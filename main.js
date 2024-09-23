@@ -289,7 +289,7 @@ function displayMerchantCoupons(coupons) {
       amount = coupon.attributes.amount
     }
     couponsView.innerHTML += 
-    `<article class="coupon" id="coupon-${coupon.id}">
+    `<article class="coupon ${coupon.attributes.active}" id="coupon-${coupon.id}">
         <h3 class="coupon-name">${coupon.attributes.name}</h3>
         <p class="coupon-code">${coupon.attributes.code}</p>
         <p class="coupon-amount">${amount}<p>

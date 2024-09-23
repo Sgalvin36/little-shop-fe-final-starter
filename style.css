@@ -196,6 +196,20 @@ h3 {
 .merchant-options > .delete-merchant:hover {
   color: var(--red);
 }
+.coupon {
+  cursor: pointer;
+}
+
+.coupon-name {
+  min-width: 20%;
+}
+.Inactive {
+  background-color: var(--red);
+}
+
+.Active {
+  background-color: var(--green);
+}
 
 /* STATUS MESSAGES */
 .success {
