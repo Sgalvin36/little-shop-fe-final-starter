@@ -11,7 +11,8 @@ const itemsNavButton = document.querySelector("#items-nav")
 const addNewButton = document.querySelector("#add-new-button")
 const addCouponButton = document.querySelector("#add-new-coupon-button")
 const showingText = document.querySelector("#showing-text")
-
+const couponToggle = document.querySelector("#coupons-view")
+    
 //Form elements
 const merchantForm = document.querySelector("#new-merchant-form")
 const newMerchantName = document.querySelector("#new-merchant-name")
@@ -34,6 +35,9 @@ submitMerchantButton.addEventListener('click', (event) => {
   submitMerchant(event)
 })
 
+couponToggle.addEventListener('click', (event) => {
+  toggleCoupon(event)
+})
 //Global variables
 let merchants;
 let items;
@@ -139,6 +143,32 @@ function submitMerchant(event) {
     })
 }
 
+function toggleCoupon(event) {
+  event.preventDefault()
+  const article = event.target.closest('article')
+  const id = article.id.split('-')[1]
+  let activeStatus = article.querySelector('.coupon-active').innerHTML
+  const merchantId = document.querySelector('span').innerHTML.split('#')[1]
+  let patchBody = {}
+  if (activeStatus === 'Active') {
+    patchBody = { active: false}
+  } else if (activeStatus === 'Inactive' && couponCount() < 5) {
+    patchBody = { active: true}
+  } else {
+    return showStatus('Too many coupons active!', false)
+  }
+  editData(`merchants/${merchantId}/coupons/${id}`, patchBody)
+    .then(patchResponse => {
+      console.log(coupons)
+      console.log(merchants)
+      let updateCoupon = findCoupon(patchResponse.data.id)
+      let indexofCoupon = coupons.indexOf(updateCoupon)
+      coupons.splice(indexofCoupon, 1, patchResponse.data)
+      displayMerchantCoupons(coupons)
+      showStatus('Coupon Updated', true)
+    })
+
+}
 // Functions that control the view 
 function showMerchantsView() {
   showingText.innerText = "All Merchants"
@@ -250,7 +280,6 @@ function getMerchantCoupons(event) {
 function displayMerchantCoupons(coupons) {
   show([couponsView, addCouponButton])
   hide([merchantsView, itemsView, addNewButton, merchantForm])
-  // showingText.innerHTML = `All Coupons`
   couponsView.innerHTML = ''
   coupons.forEach(coupon => {
     let amount;
@@ -260,14 +289,11 @@ function displayMerchantCoupons(coupons) {
       amount = coupon.attributes.amount
     }
     couponsView.innerHTML += 
-    `<article class="coupon" id="coupon-${coupon.id}">
+    `<article class="coupon ${coupon.attributes.active}" id="coupon-${coupon.id}">
         <h3 class="coupon-name">${coupon.attributes.name}</h3>
         <p class="coupon-code">${coupon.attributes.code}</p>
         <p class="coupon-amount">${amount}<p>
         <p class="coupon-active">${coupon.attributes.active}</p>
-        <div class="coupon-options">
-          <button class="toggle-coupon">Activate/Deactivate</button>
-        </div>
       </article>`
     })
 }
@@ -311,4 +337,20 @@ function findMerchant(id) {
       return foundMerchant
     }
   }
+}
+
+function couponCount() {
+  let allCouponStatus = document.querySelectorAll(".coupon-active")
+  let activeCoupons = []
+  allCouponStatus.forEach((coupon) => {
+    if (coupon.innerHTML === "Active") {
+      activeCoupons.push(coupon.innerHTML)
+    }
+  })
+  return activeCoupons.length
+}
+
+function findCoupon(id) {
+  let found = coupons.filter((coupon) => coupon['id'] === id)
+  return found[0]
 }
