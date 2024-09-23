@@ -9,6 +9,7 @@ const merchantsView = document.querySelector("#merchants-view")
 const merchantsNavButton = document.querySelector("#merchants-nav")
 const itemsNavButton = document.querySelector("#items-nav")
 const addNewButton = document.querySelector("#add-new-button")
+const addCouponButton = document.querySelector("#add-new-coupon-button")
 const showingText = document.querySelector("#showing-text")
 
 //Form elements
@@ -36,6 +37,7 @@ submitMerchantButton.addEventListener('click', (event) => {
 //Global variables
 let merchants;
 let items;
+let coupons;
 
 //Page load data fetching
 Promise.all([fetchData('merchants'), fetchData('items')])
@@ -143,7 +145,7 @@ function showMerchantsView() {
   addRemoveActiveNav(merchantsNavButton, itemsNavButton)
   addNewButton.dataset.state = 'merchant'
   show([merchantsView, addNewButton])
-  hide([itemsView])
+  hide([itemsView, couponsView, addCouponButton])
   displayMerchants(merchants)
 }
 
@@ -152,7 +154,7 @@ function showItemsView() {
   addRemoveActiveNav(itemsNavButton, merchantsNavButton)
   addNewButton.dataset.state = 'item'
   show([itemsView])
-  hide([merchantsView, merchantForm, addNewButton, couponsView])
+  hide([merchantsView, merchantForm, addNewButton, couponsView, addCouponButton])
   displayItems(items)
 }
 
@@ -236,20 +238,38 @@ function getMerchantCoupons(event) {
   let merchantId = event.target.closest("article").id.split('-')[1]
   console.log("Merchant ID:", merchantId)
 
-  fetchData(`merchants/${merchantId}`)
+  fetchData(`merchants/${merchantId}/coupons`)
   .then(couponData => {
-    console.log("Coupon data from fetch:", couponData)
-    displayMerchantCoupons(couponData);
+    coupons = couponData.data
+    console.log("Coupon data from fetch:", coupons)
+    showingText.innerHTML = `All Coupons for Merchant #${merchantId}`
+    displayMerchantCoupons(coupons);
   })
 }
 
 function displayMerchantCoupons(coupons) {
-  show([couponsView])
-  hide([merchantsView, itemsView])
-
-  couponsView.innerHTML = `
-    <p>Coupon data will go here.</p>
-  `
+  show([couponsView, addCouponButton])
+  hide([merchantsView, itemsView, addNewButton, merchantForm])
+  // showingText.innerHTML = `All Coupons`
+  couponsView.innerHTML = ''
+  coupons.forEach(coupon => {
+    let amount;
+    if (!coupon.attributes.amount) {
+      amount = coupon.attributes.percentage_off
+    } else {
+      amount = coupon.attributes.amount
+    }
+    couponsView.innerHTML += 
+    `<article class="coupon" id="coupon-${coupon.id}">
+        <h3 class="coupon-name">${coupon.attributes.name}</h3>
+        <p class="coupon-code">${coupon.attributes.code}</p>
+        <p class="coupon-amount">${amount}<p>
+        <p class="coupon-active">${coupon.attributes.active}</p>
+        <div class="coupon-options">
+          <button class="toggle-coupon">Activate/Deactivate</button>
+        </div>
+      </article>`
+    })
 }
 
 //Helper Functions
