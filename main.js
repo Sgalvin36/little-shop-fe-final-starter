@@ -9,7 +9,6 @@ const merchantsView = document.querySelector("#merchants-view")
 const merchantsNavButton = document.querySelector("#merchants-nav")
 const itemsNavButton = document.querySelector("#items-nav")
 const addNewButton = document.querySelector("#add-new-button")
-const addCouponButton = document.querySelector("#add-new-coupon-button")
 const showingText = document.querySelector("#showing-text")
 const couponToggle = document.querySelector("#coupons-view")
     
@@ -175,7 +174,7 @@ function showMerchantsView() {
   addRemoveActiveNav(merchantsNavButton, itemsNavButton)
   addNewButton.dataset.state = 'merchant'
   show([merchantsView, addNewButton])
-  hide([itemsView, couponsView, addCouponButton])
+  hide([itemsView, couponsView])
   displayMerchants(merchants)
 }
 
@@ -184,7 +183,7 @@ function showItemsView() {
   addRemoveActiveNav(itemsNavButton, merchantsNavButton)
   addNewButton.dataset.state = 'item'
   show([itemsView])
-  hide([merchantsView, merchantForm, addNewButton, couponsView, addCouponButton])
+  hide([merchantsView, merchantForm, addNewButton, couponsView])
   displayItems(items)
 }
 
@@ -278,7 +277,7 @@ function getMerchantCoupons(event) {
 }
 
 function displayMerchantCoupons(coupons) {
-  show([couponsView, addCouponButton])
+  show([couponsView])
   hide([merchantsView, itemsView, addNewButton, merchantForm])
   couponsView.innerHTML = ''
   coupons.forEach(coupon => {
@@ -296,6 +295,9 @@ function displayMerchantCoupons(coupons) {
         <p class="coupon-active">${coupon.attributes.active}</p>
       </article>`
     })
+  couponsView.innerHTML +=
+  `<h3 class="coupon-total">${couponCount()} / ${coupons.length}</h3>
+  <p>Click on coupons to activate or deactive. Max of 5 active.</p>`
 }
 
 //Helper Functions
